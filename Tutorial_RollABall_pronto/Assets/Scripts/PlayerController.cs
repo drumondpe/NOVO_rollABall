@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
-using UnityEngine.SceneManagement; // Certifique-se de incluir este namespace
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -16,8 +16,10 @@ public class PlayerController : MonoBehaviour
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
     public GameObject restartTextObject;
+    public TextMeshProUGUI timerTextObject; // Objeto de texto para o timer
     private Vector3 startPosition;
-    private bool gameWon = false; // Adicione esta variável para manter o estado de vitória
+    private bool gameWon = false;
+    private float timer = 0.0f; // Variável para manter o tempo decorrido
 
     void Start()
     {
@@ -27,6 +29,7 @@ public class PlayerController : MonoBehaviour
         winTextObject.SetActive(false);
         restartTextObject.SetActive(false);
         startPosition = transform.position;
+        timerTextObject.text = "Tempo: 00:00"; // Inicializar o texto do timer
     }
 
     void OnMove(InputValue movementValue)
@@ -44,7 +47,14 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Verificar se o jogador caiu ou ganhou e pressionou espaço
+        if (!gameWon) // Atualizar o timer apenas se o jogo não estiver ganho
+        {
+            timer += Time.deltaTime; // Aumentar o timer com o tempo desde o último frame
+            int minutes = (int)timer / 60; // Converter o tempo total em minutos
+            int seconds = (int)timer % 60; // Converter o tempo restante em segundos
+            timerTextObject.text = string.Format("Tempo: {0:00}:{1:00}", minutes, seconds); // Atualizar o texto do timer
+        }
+
         if ((transform.position.y < -3 || gameWon) && Input.GetKeyDown(KeyCode.Space))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -75,10 +85,16 @@ public class PlayerController : MonoBehaviour
         countText.text = "Contagem: " + count.ToString();
         if (count >= 23)
         {
+            int minutes = (int)timer / 60;
+            int seconds = (int)timer % 60;
+            string finalTime = string.Format("{0:00}:{1:00}", minutes, seconds);
+            // Incluímos a mensagem de tempo decorrido na mensagem de vitória existente
+            winTextObject.GetComponent<TextMeshProUGUI>().text = "Você venceu!\nTempo total: " + finalTime + "\n\nAperte 'Barra de Espaço' para recomeçar";
             winTextObject.GetComponent<TextMeshProUGUI>().color = Color.green;
             winTextObject.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
+            winTextObject.GetComponent<TextMeshProUGUI>().fontSize = 32;
             winTextObject.SetActive(true);
-            gameWon = true; // Definir o estado de vitória como verdadeiro
+            gameWon = true; // Marca o jogo como ganho para parar o timer
         }
     }
 }
