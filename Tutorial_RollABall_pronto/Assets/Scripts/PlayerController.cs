@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
@@ -17,9 +16,7 @@ public class PlayerController : MonoBehaviour
     public GameObject winTextObject;
     public GameObject restartTextObject;
     public TextMeshProUGUI timerTextObject; // Objeto de texto para o timer
-    private Vector3 startPosition;
-    private bool gameWon = false;
-    private float timer = 0.0f; // Variável para manter o tempo decorrido
+    private float timer = 35.0f; // 35 segundos para a contagem regressiva
 
     void Start()
     {
@@ -28,8 +25,7 @@ public class PlayerController : MonoBehaviour
         SetCountText();
         winTextObject.SetActive(false);
         restartTextObject.SetActive(false);
-        startPosition = transform.position;
-        timerTextObject.text = "Tempo: 00:00"; // Inicializar o texto do timer
+        timerTextObject.text = FormatTime(timer); // Inicializar o texto do timer
     }
 
     void OnMove(InputValue movementValue)
@@ -41,22 +37,34 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate() 
     {
-        Vector3 movement = new Vector3(movementX, 0.0f, movementY);
-        Debug.Log($"movement: {movement}");
-        rb.AddForce(movement * speed);
+        if (timer > 0) // Permitir movimento apenas se ainda houver tempo
+        {
+            Vector3 movement = new Vector3(movementX, 0.0f, movementY);
+            rb.AddForce(movement * speed);
+        }
+    }
+
+    private string FormatTime(float time)
+    {
+        int minutes = (int)time / 60;
+        int seconds = (int)time % 60;
+        return string.Format("Tempo: {0:00}:{1:00}", minutes, seconds);
     }
 
     void Update()
     {
-        if (!gameWon) // Atualizar o timer apenas se o jogo não estiver ganho
+        if (timer > 0) // Continuar a decrementar o timer se houver tempo restante
         {
-            timer += Time.deltaTime; // Aumentar o timer com o tempo desde o último frame
-            int minutes = (int)timer / 60; // Converter o tempo total em minutos
-            int seconds = (int)timer % 60; // Converter o tempo restante em segundos
-            timerTextObject.text = string.Format("Tempo: {0:00}:{1:00}", minutes, seconds); // Atualizar o texto do timer
+            timer -= Time.deltaTime;
+            timerTextObject.text = FormatTime(timer);
+        }
+        else if (!restartTextObject.activeSelf)
+        {
+            restartTextObject.GetComponent<TextMeshProUGUI>().text = "Tempo Esgotado!\nAperte 'Barra de Espaço' para tentar novamente";
+            restartTextObject.SetActive(true);
         }
 
-        if ((transform.position.y < -3 || gameWon) && Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
@@ -76,7 +84,7 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("PickUp")) 
         {
             other.gameObject.SetActive(false);
-            count = count + 1;
+            count += 1;
             SetCountText();
         }
     }
@@ -84,18 +92,14 @@ public class PlayerController : MonoBehaviour
     void SetCountText() 
     {
         countText.text = "Contagem: " + count.ToString();
-        if (count >= 23)
+        if (count >= 23 && timer > 0)
         {
-            int minutes = (int)timer / 60;
-            int seconds = (int)timer % 60;
-            string finalTime = string.Format("{0:00}:{1:00}", minutes, seconds);
-            // Incluímos a mensagem de tempo decorrido na mensagem de vitória existente
-            winTextObject.GetComponent<TextMeshProUGUI>().text = "Você venceu!\nTempo total: " + finalTime + "\n\nAperte 'Barra de Espaço' para recomeçar";
+            winTextObject.GetComponent<TextMeshProUGUI>().text = "Você venceu!\nTempo restante: " + FormatTime(timer) + "\nAperte 'Barra de Espaço' para recomeçar";
             winTextObject.GetComponent<TextMeshProUGUI>().color = Color.green;
             winTextObject.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
             winTextObject.GetComponent<TextMeshProUGUI>().fontSize = 32;
             winTextObject.SetActive(true);
-            gameWon = true; // Marca o jogo como ganho para parar o timer
+            timer = 0; // Para a contagem regressiva
         }
     }
 }
