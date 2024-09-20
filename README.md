@@ -28,6 +28,9 @@ Todo o tutorial oficial "Roll-a-Ball" foi concluído, garantindo o funcionamento
 #### 2.5 UI
 - Exibir o score e o tempo atual na interface durante o jogo (+0.25 ~ 0.75 pontos): Durante a partida, o jogador pode visualizar o score atual e o tempo decorrido, o que facilita o acompanhamento de seu progresso no jogo.
 
+#### 2.6 Controles
+- Adicionar suporte a joytick/controle xbox (+0.5)
+
 #### 2.7 Level Design
 - Modificar a arena básica (+0.25 ~ 1 pontos): A arena foi modificada com novos elementos que aumentam a complexidade do cenário.
 - Utilizar malhas complexas (novos objetos 3D) (+0.5 pontos):  Novos modelos 3D foram introduzidos para enriquecer o visual e aumentar a variedade dos objetos no cenário.
