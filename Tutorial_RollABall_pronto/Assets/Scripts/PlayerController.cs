@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
     public GameObject restartTextObject;
+    public GameObject timeIsUpTextObject; // Objeto de texto para "Tempo Esgotado"
     public TextMeshProUGUI timerTextObject; // Objeto de texto para o timer
     private float timer = 35.0f; // 35 segundos para a contagem regressiva
 
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour
         SetCountText();
         winTextObject.SetActive(false);
         restartTextObject.SetActive(false);
+        timeIsUpTextObject.SetActive(false);
         timerTextObject.text = FormatTime(timer); // Inicializar o texto do timer
     }
 
@@ -37,11 +39,8 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate() 
     {
-        if (timer > 0) // Permitir movimento apenas se ainda houver tempo
-        {
-            Vector3 movement = new Vector3(movementX, 0.0f, movementY);
-            rb.AddForce(movement * speed);
-        }
+        Vector3 movement = new Vector3(movementX, 0.0f, movementY);
+        rb.AddForce(movement * speed);
     }
 
     private string FormatTime(float time)
@@ -53,29 +52,26 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (timer > 0) // Continuar a decrementar o timer se houver tempo restante
+        if (!winTextObject.activeSelf && timer > 0)
         {
             timer -= Time.deltaTime;
             timerTextObject.text = FormatTime(timer);
         }
-        else if (!restartTextObject.activeSelf)
+
+        // Verifique se o tempo acabou e nenhuma outra condição de término está ativa
+        if (timer <= 0 && !winTextObject.activeSelf && !timeIsUpTextObject.activeSelf && !restartTextObject.activeSelf)
         {
-            restartTextObject.GetComponent<TextMeshProUGUI>().text = "Tempo Esgotado!\nAperte 'Barra de Espaço' para tentar novamente";
+            timeIsUpTextObject.SetActive(true);
+        }
+
+        if (transform.position.y < -3 && !restartTextObject.activeSelf && !timeIsUpTextObject.activeSelf && !winTextObject.activeSelf)
+        {
             restartTextObject.SetActive(true);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && (winTextObject.activeSelf || restartTextObject.activeSelf || timeIsUpTextObject.activeSelf))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-
-        if (transform.position.y < -3)
-        {
-            restartTextObject.SetActive(true);
-        }
-        else
-        {
-            restartTextObject.SetActive(false);
         }
     }
 
@@ -94,12 +90,12 @@ public class PlayerController : MonoBehaviour
         countText.text = "Contagem: " + count.ToString();
         if (count >= 23 && timer > 0)
         {
-            winTextObject.GetComponent<TextMeshProUGUI>().text = "Você venceu!\nTempo restante: " + FormatTime(timer) + "\nAperte 'Barra de Espaço' para recomeçar";
+            winTextObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().color = Color.green;
             winTextObject.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
             winTextObject.GetComponent<TextMeshProUGUI>().fontSize = 32;
             winTextObject.SetActive(true);
-            timer = 0; // Para a contagem regressiva
+            timer = 0; // Para garantir que o tempo não seja um fator após a vitória
         }
     }
 }
