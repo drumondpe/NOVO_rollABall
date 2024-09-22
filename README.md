@@ -46,6 +46,10 @@ Nota esperada (esperada porque varia pelo entendimento do avaliador): 5,4-5,7
 - O tempo total será exibido ao final da partida.
 - Acompanhe seu score e tempo em tempo real na interface do jogo.
 
-### Links
-- Projeto no Itch.io
-- Repositório Público no GitHub
+### Link
+- Projeto no Itch.io:
+https://pedrogsd.itch.io/tutorial-roll-a-ball
+
+### Referências
+- Tutorial de referência para fazer o menu: https://www.youtube.com/watch?v=yIaAE9bLxXI
+- Asset do cano: https://assetstore.unity.com/packages/3d/environments/urban/yughues-free-concrete-pipes-13277
